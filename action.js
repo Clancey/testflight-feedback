@@ -7,7 +7,7 @@ core.setCommandEcho(true)
 
 async function run() {
     try {
-        const package = 'lukas-ruzicka/testflight-feedback' + '@' + version
+        const package = 'clancey/testflight-feedback' + '@' + version
         
         // Make sure `Mint` is installed
         if (await isInstalled('mint')) {
