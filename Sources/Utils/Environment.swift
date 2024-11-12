@@ -8,7 +8,6 @@ public enum Environment: String {
     case githubToken = "GITHUB_TOKEN"
     case repositoryPath = "FEEDBACK_REPOSITORY_PATH"
     case appId = "FEEDBACK_APP_ID"
-    case issuerId = "FEEDBACK_ISSUER_ID"
     case backlogColumnId = "FEEDBACK_BACKLOG_COLUMN_ID"
 
     public func value() throws -> String {
@@ -40,8 +39,6 @@ public enum Environment: String {
             return Arguments.shared?.repositoryPath
         case .appId:
             return Arguments.shared?.appId
-        case .issuerId:
-            return Arguments.shared?.issuerId
         case .backlogColumnId:
             return Arguments.shared?.backlogColumnId
         }

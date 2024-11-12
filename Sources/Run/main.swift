@@ -25,8 +25,6 @@ extension TestflightFeedback {
         @Option(name: .shortAndLong, help: "App Store App ID. Can be set using \"FEEDBACK_APP_ID\" environment variable.")
         var appId: String?
 
-        @Option(name: .shortAndLong, help: "Issuer ID of your Apple Developer account. Can be set using \"FEEDBACK_ISSUER_ID\" environment variable.")
-        var issuerId: String?
 
         @Option(name: .shortAndLong, help: "GitHub column ID to which the newly created ticket should be added. Can be set using \"FEEDBACK_BACKLOG_COLUMN_ID\" environment variable.")
         var backlogColumnId: String?
@@ -35,7 +33,6 @@ extension TestflightFeedback {
             Arguments.setup(githubToken: commonOptions.githubToken,
                             repositoryPath: commonOptions.repositoryPath,
                             appId: appId,
-                            issuerId: issuerId,
                             backlogColumnId: backlogColumnId)
             FetchFeedback.runScript()
         }

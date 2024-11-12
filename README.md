@@ -136,7 +136,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         FEEDBACK_REPOSITORY_PATH: ${{ github.repository }}
         FEEDBACK_APP_ID: your_apps_id
-        FEEDBACK_ISSUER_ID: your_issuer_id
         FEEDBACK_BACKLOG_COLUMN_ID: your_backlog_column_id
 ```
 
