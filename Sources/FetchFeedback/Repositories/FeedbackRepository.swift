@@ -120,7 +120,7 @@ private extension FeedbackRepository {
     }
 
     static func baseIrisURL() throws -> URL {
-        URL(string: "https://appstoreconnect.apple.com/iris/provider/\(try Environment.issuerId.value())/v1")!
+        URL(string: "https://appstoreconnect.apple.com/iris/v1")!
     }
 }
 
