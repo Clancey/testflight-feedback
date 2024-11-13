@@ -24,12 +24,31 @@ final class FeedbackRepository {
         try await saveMetadata(decoded)
         return decoded.data
     }
+    static func getCrashes(attempt: Int = 0) async throws -> [Feedback] {
+        let data = try await fetchFeedbacks()
+        let decoded = try decodeFeedbacks(data)
+        if decoded.data.isEmpty {
+            let noFeedbackError = AppStoreConnectAPIError.noFeedback(rawResponse: data)
+            guard attempt < 3 else { throw noFeedbackError }
+            print("\(noFeedbackError.localizedDescription). Trying again..", color: .yellow)
+            return try await getFeedbacks(attempt: attempt + 1)
+        }
+        try await saveMetadata(decoded)
+        return decoded.data
+    }
 }
 
 private extension FeedbackRepository {
 
     static func fetchFeedbacks() async throws -> Data {
         var request = URLRequest(url: try feedbacksURL())
+        try request.setupFastlaneAuthorization()
+
+        print("Fetching feedback with request: \(request.description)", color: .cyan)
+        return try await URLSession.shared.data(for: request).0
+    }
+    static func fetchCrashes() async throws -> Data {
+        var request = URLRequest(url: try crashesURL())
         try request.setupFastlaneAuthorization()
 
         print("Fetching feedback with request: \(request.description)", color: .cyan)
@@ -110,6 +129,21 @@ private extension FeedbackRepository {
             .init(name: "filter[buildBundle.bundleType]", value: "APP"),
             .init(name: "filter[devicePlatform]", value: "IOS"),
             .init(name: "exists[crash]", value: "false"),
+            .init(name: "include", value: "build,screenshots"),
+            .init(name: "fields[builds]", value: "version"),
+            .init(name: "fields[betaScreenshots]", value: "imageAssets"),
+            .init(name: "limit", value: "60"),
+            .init(name: "sort", value: "-timestamp"),
+        ]
+        return urlComponents.url!
+    }
+    static func crashesURL() throws -> URL {
+        let feedbacksURL = try baseIrisURL().appendingPathComponent("betaFeedbacks")
+        var urlComponents = URLComponents(url: feedbacksURL, resolvingAgainstBaseURL: false)!
+        urlComponents.queryItems = [
+            .init(name: "filter[build.app]", value: try Environment.appId.value()),
+            .init(name: "filter[buildBundle.bundleType]", value: "APP"),
+            .init(name: "filter[devicePlatform]", value: "IOS"),
             .init(name: "include", value: "build,screenshots"),
             .init(name: "fields[builds]", value: "version"),
             .init(name: "fields[betaScreenshots]", value: "imageAssets"),

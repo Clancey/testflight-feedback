@@ -50,7 +50,49 @@ extension Issue {
         <!-- DO NOT MODIFY THE FOLLOWING LINE AND LEAVE IT ALWAYS THE LAST -->
         <!-- \(DateFormatter.iso8601.string(from: feedback.attributes.timestamp)) -->
         """
-        var labels: [String] = []
+        var labels: [String] = ["Feedback"]
+        if let osVersion = feedback.attributes.osVersion {
+            labels.append("iOS " + osVersion)
+        }
+        self.labels = labels
+        milestone = milestoneNumber
+    }
+
+    init(from feedback: Feedback, milestoneNumber: Int?) throws {
+        title = DateFormatter.readable.string(from: feedback.attributes.timestamp)
+        let originalLink = "https://appstoreconnect.apple.com/apps/\(try Environment.appId.value())/testflight/crashes/\(feedback.id)?sort=-timestamp"
+        let comment = feedback.attributes.comment.unwrap()
+        let translationLink = comment.getTranslationLinkIfNotEnglish()
+        body = """
+        ### Crash Feedback
+        > \(comment.replacingOccurrences(of: "\n", with: "\n> "))
+        \(translationLink != nil ? "\n\(translationLink!)\n": "")
+        - Email: \(feedback.attributes.emailAddress.unwrap())
+        - Submitted on: \(DateFormatter.readable.string(from: feedback.attributes.timestamp))
+        - [Original AppStoreConnect Feedback Ticket](\(originalLink))
+
+        ### App
+        | App Version | App Platform | Uptime |
+        |:------:|:------:|:------:|
+        | \(feedback.appVersionString) | \(feedback.attributes.appPlatform.unwrap()) | \(feedback.attributes.appUptimeMillis.toHours()) h |
+
+        ### Device
+        | Device | Device Family | Device Platform | OS Version | Battery |
+        |:------:|:------:|:------:|:------:|:------:|
+        | \(feedback.attributes.deviceModelLinked) | \(feedback.attributes.deviceFamily.unwrap()) | \(feedback.attributes.devicePlatform.unwrap()) | \(feedback.attributes.osVersion.unwrap()) | \(feedback.attributes.batteryPercentage ?? 0)% |
+
+        | Carrier | Time Zone | Locale | Architecture |
+        |:------:|:------:|:------:|:------:|
+        | \(feedback.attributes.carrier.unwrap()) | \(feedback.attributes.timezone.unwrap()) | \(feedback.attributes.locale.unwrap()) | \(feedback.attributes.architecture.unwrap()) |
+
+        | Connection Status | Network Type | Disk Free | Screen Resolution |
+        |:------:|:------:|:------:|:------:|
+        | \(feedback.attributes.connectionStatus.unwrap()) | \(feedback.attributes.networkType.unwrap()) | \(feedback.attributes.availableDiskBytes.toGB()) /  \(feedback.attributes.totalDiskBytes.toGB()) GB | \(feedback.attributes.screenWidth ?? 0) x \(feedback.attributes.screenHeight ?? 0) |
+
+        <!-- DO NOT MODIFY THE FOLLOWING LINE AND LEAVE IT ALWAYS THE LAST -->
+        <!-- \(DateFormatter.iso8601.string(from: feedback.attributes.timestamp)) -->
+        """
+        var labels: [String] = ["Crash Report"]
         if let osVersion = feedback.attributes.osVersion {
             labels.append("iOS " + osVersion)
         }

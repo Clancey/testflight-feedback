@@ -11,15 +11,46 @@ final class GitHubRepository {
 
     // MARK: - Static Methods
 
-    static func getLastIssueTimestamp() async throws -> Date? {
-        let tickets: [IssueResponse] = try await GitHubHelper.fetchLatestIssues()
+    static func getLastScreenshotTimestamp() async throws -> Date? {
+        if tickets.isEmpty {
+            tickets = try await GitHubHelper.fetchLatestIssues()
+        }
+        //IF no tickets return min date
+        if tickets.isEmpty {
+            return Date(timeIntervalSince1970: 0)
+        }
+        
         let lastTicketTimestamp = tickets
+            .filter(\.isScreenShotIssue)
             .compactMap(\.appStoreConnectCreationDate)
             .max()
 
         if let date = lastTicketTimestamp {
             print([
-                .init(text: "Last ticket is based on feedback from: ", color: .cyan),
+                .init(text: "Last screenshot is based on feedback from: ", color: .cyan),
+                .init(text: DateFormatter.readable.string(from: date), color: .cyan, bold: true)
+            ])
+        }
+        return lastTicketTimestamp
+    }
+    static var tickets: [IssueResponse] = []
+    static func getLastCrashTimestamp() async throws -> Date? {
+        if tickets.isEmpty {
+            tickets = try await GitHubHelper.fetchLatestIssues()
+        }
+        //IF no tickets return min date
+        if tickets.isEmpty {
+            return Date(timeIntervalSince1970: 0)
+        }
+        
+        let lastTicketTimestamp = tickets
+            .filter(\.isCrashReportIssue)
+            .compactMap(\.appStoreConnectCreationDate)
+            .max()
+
+        if let date = lastTicketTimestamp {
+            print([
+                .init(text: "Last crash is based on feedback from: ", color: .cyan),
                 .init(text: DateFormatter.readable.string(from: date), color: .cyan, bold: true)
             ])
         }
@@ -37,6 +68,16 @@ final class GitHubRepository {
         let screenshots = try await addScreenshotsToRepository(feedback.screenshotURLs,
                                                                timestamp: feedback.attributes.timestamp)
         let issue = try Issue(from: feedback, milestoneNumber: milestone.number, screenshots: screenshots)
+        let githubIssue = try await createIssue(issue)
+        if let backlogColumnIdString = try? Environment.backlogColumnId.value(),
+           let backlogColumnId = Int(backlogColumnIdString) {
+            let card = try await add(issue: githubIssue, to: backlogColumnId)
+            print("Project card created successfully: \(card)", color: .green)
+        }
+    }
+    func setupCrash(feedback: Feedback) async throws {
+        let milestone = try await dequeueMilestone(title: feedback.appVersionString)
+        let issue = try Issue(from: feedback, milestoneNumber: milestone.number)
         let githubIssue = try await createIssue(issue)
         if let backlogColumnIdString = try? Environment.backlogColumnId.value(),
            let backlogColumnId = Int(backlogColumnIdString) {
