@@ -34,13 +34,18 @@ public func runScript() {
             }
 
             shouldUpdateTimestamps = false;
-            try await updateTimeStamps(lastInsertedCrashTimestamp: lastInsertedCrashTimestamp, lastInsertedScreenshotTimestamp: lastInsertedScreenshotTimestamp)
+            do{
+                try await updateTimeStamps(lastInsertedCrashTimestamp: lastInsertedCrashTimestamp, lastInsertedScreenshotTimestamp: lastInsertedScreenshotTimestamp)
+            }
+            catch{
+                print("Failed to update timestamps: \(error)", color: .red)
+            }
             exit(EXIT_SUCCESS)
         } catch {
             printFailedJob(error)
             if shouldUpdateTimestamps {
                 do{
-                try await updateTimeStamps(lastInsertedCrashTimestamp: lastInsertedCrashTimestamp, lastInsertedScreenshotTimestamp: lastInsertedScreenshotTimestamp)
+                    try await updateTimeStamps(lastInsertedCrashTimestamp: lastInsertedCrashTimestamp, lastInsertedScreenshotTimestamp: lastInsertedScreenshotTimestamp)
                 }
                 catch{
                     printFailedJob(error)
