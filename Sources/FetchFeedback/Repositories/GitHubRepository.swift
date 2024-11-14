@@ -103,6 +103,7 @@ final class GitHubRepository {
         if let milestone = milestones.first(where: { $0.title == title }) {
             return milestone
         } else {
+            print("Milestone Creating: \(title)", color: .green)
             let milestone = try await createMilestone(title)
             print("Milestone created successfully: \(milestone)", color: .green)
             milestones.append(milestone)
