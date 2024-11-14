@@ -82,7 +82,6 @@ final class GitHubRepository {
     /// - adds the issue to backlog column
     func setupIssue(feedback: Feedback) async throws {
         let milestone = try await dequeueMilestone(title: feedback.appVersionString)
-        let screenshots = try await addScreenshotsToRepository(
         var screenshots: [ImageReference] = []
         do{ screenshots = try await addScreenshotsToRepository(
             feedback.screenshotURLs,
