@@ -18,6 +18,8 @@ final class GitHubRepository {
             print("Last crash timestamp: \(lastCrashTimestamp?.description ?? "nil")")
             return lastCrashTimestamp
         } catch {
+            print("Error getting last screenshot timestamp: \(error)")
+            print("Using issues to get last crash timestamp")
             let tickets = try await GitHubHelper.fetchLatestIssues(labels: "Feedback")
 
             //IF no tickets return min date
@@ -48,7 +50,8 @@ final class GitHubRepository {
             print("Last crash timestamp: \(lastCrashTimestamp?.description ?? "nil")")
             return lastCrashTimestamp
         } catch {
-
+            print("Error getting last crash timestamp: \(error)")
+            print("Using issues to get last crash timestamp")
             let tickets = try await GitHubHelper.fetchLatestIssues(labels: "Crash Report")
             //IF no tickets return min date
             if tickets.isEmpty {
