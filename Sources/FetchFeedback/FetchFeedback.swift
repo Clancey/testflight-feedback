@@ -23,7 +23,7 @@ public func runScript() {
                 let githubRepo = try await GitHubRepository()
 
                 for feedback in newCrashes.reversed() {
-                    try await githubRepo.setupIssue(feedback: feedback)
+                    try await githubRepo.setupCrash(feedback: feedback)
                 }
             }
 
