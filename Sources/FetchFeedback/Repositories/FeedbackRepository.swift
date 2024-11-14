@@ -25,8 +25,10 @@ final class FeedbackRepository {
         return decoded.data
     }
     static func getCrashes(attempt: Int = 0) async throws -> [Feedback] {
-        let data = try await fetchFeedbacks()
+        let data = try await fetchCrashes()
+        print("we have crashes Data, trying to parse")
         let decoded = try decodeFeedbacks(data)
+        print("We parsed the crashes")
         if decoded.data.isEmpty {
             let noFeedbackError = AppStoreConnectAPIError.noFeedback(rawResponse: data)
             guard attempt < 3 else { throw noFeedbackError }
@@ -51,7 +53,7 @@ private extension FeedbackRepository {
         var request = URLRequest(url: try crashesURL())
         try request.setupFastlaneAuthorization()
 
-        print("Fetching feedback with request: \(request.description)", color: .cyan)
+        print("Fetching crashes with request: \(request.description)", color: .cyan)
         return try await URLSession.shared.data(for: request).0
     }
 
@@ -144,6 +146,7 @@ private extension FeedbackRepository {
             .init(name: "filter[build.app]", value: try Environment.appId.value()),
             .init(name: "filter[buildBundle.bundleType]", value: "APP"),
             .init(name: "filter[devicePlatform]", value: "IOS"),
+            .init(name: "exists[crash]", value: "true"),
             .init(name: "include", value: "build,screenshots"),
             .init(name: "fields[builds]", value: "version"),
             .init(name: "fields[betaScreenshots]", value: "imageAssets"),

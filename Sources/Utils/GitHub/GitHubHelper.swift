@@ -1,5 +1,9 @@
 import Foundation
+struct UpdateVariable: Encodable {
 
+    let name: String
+    let value: String
+}
 public final class GitHubHelper {
 
     // NOTE: - The endpoint considers Pull Requests to be Issues too, so we need to fetch more of them by default to ensure that one is the latest created Issue
@@ -9,6 +13,16 @@ public final class GitHubHelper {
         let response: [IssueResponse] = try await GitHubNetworking.perform(dataRequest: request, decoder: .decoderWithoutMiliseconds)
         return response
             .filter(\.isIssue)
+    }
+    public static func fetchVariable(key:String) async throws -> String {
+        let request = URLRequest(url: try fetchVariableURL(key:key))
+        print("Fetching variable with request: \(request.description)", color: .cyan)
+        let response: String = try await GitHubNetworking.perform(dataRequest: request, decoder: .decoderWithoutMiliseconds)
+        return response
+    }
+     public static func updateVariable(key:String, value:String) async throws {
+        let request = try URLRequest(url: try fetchVariableURL(key: key), method: .patch, body: UpdateVariable(name: key, value: value))
+        try await GitHubNetworking.perform(request: request)
     }
 }
 
@@ -29,7 +43,12 @@ public extension GitHubHelper {
         try repositoryURL()
             .appendingPathComponent("issues")
     }
-
+    static func fetchVariableURL(key:String) throws -> URL {
+        try repositoryURL()
+            .appendingPathComponent("actions")
+            .appendingPathComponent("variables")
+            .appendingPathComponent(key)
+    }
     /// [docu](https://docs.github.com/en/rest/issues/issues#list-repository-issues)
     static func fetchLatestIssuesURL(labels:String, count: Int = 10, page: Int = 1, issueState: GitHubIssueState = .all) throws -> URL {
         var urlComponents = URLComponents(url: try issuesURL(), resolvingAgainstBaseURL: false)!
