@@ -3,8 +3,8 @@ import Foundation
 public final class GitHubHelper {
 
     // NOTE: - The endpoint considers Pull Requests to be Issues too, so we need to fetch more of them by default to ensure that one is the latest created Issue
-    public static func fetchLatestIssues(count: Int = 30, page: Int = 1, issueState: GitHubIssueState = .all) async throws -> [IssueResponse] {
-        let request = URLRequest(url: try fetchLatestIssuesURL(count: count, page: page, issueState: issueState))
+    public static func fetchLatestIssues(labels:String,count: Int = 60, page: Int = 1, issueState: GitHubIssueState = .all) async throws -> [IssueResponse] {
+        let request = URLRequest(url: try fetchLatestIssuesURL(labels:labels,count: count, page: page, issueState: issueState))
         print("Fetching tickets with request: \(request.description)", color: .cyan)
         let response: [IssueResponse] = try await GitHubNetworking.perform(dataRequest: request, decoder: .decoderWithoutMiliseconds)
         return response
@@ -31,14 +31,15 @@ public extension GitHubHelper {
     }
 
     /// [docu](https://docs.github.com/en/rest/issues/issues#list-repository-issues)
-    static func fetchLatestIssuesURL(count: Int = 10, page: Int = 1, issueState: GitHubIssueState = .all) throws -> URL {
+    static func fetchLatestIssuesURL(labels:String, count: Int = 10, page: Int = 1, issueState: GitHubIssueState = .all) throws -> URL {
         var urlComponents = URLComponents(url: try issuesURL(), resolvingAgainstBaseURL: false)!
         urlComponents.queryItems = [
             .init(name: "state", value: "\(issueState.rawValue)"),
             .init(name: "sort", value: "created"),
             .init(name: "direction", value: "desc"),
             .init(name: "per_page", value: "\(count > 100 ? 100 : count)"),
-            .init(name: "page", value: "\(page)")
+            .init(name: "page", value: "\(page)"),
+            .init(name: "labels", value: labels)
         ]
         guard let url = urlComponents.url else { throw GitHubError.badURL(message: urlComponents.description) }
         return url

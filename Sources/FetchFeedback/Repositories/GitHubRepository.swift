@@ -12,16 +12,14 @@ final class GitHubRepository {
     // MARK: - Static Methods
 
     static func getLastScreenshotTimestamp() async throws -> Date? {
-        if tickets.isEmpty {
-            tickets = try await GitHubHelper.fetchLatestIssues()
-        }
+       let tickets = try await GitHubHelper.fetchLatestIssues(labels: "Feedback")
+        
         //IF no tickets return min date
         if tickets.isEmpty {
             return Date(timeIntervalSince1970: 0)
         }
         
         let lastTicketTimestamp = tickets
-            .filter(\.isScreenShotIssue)
             .compactMap(\.appStoreConnectCreationDate)
             .max()
 
@@ -35,16 +33,13 @@ final class GitHubRepository {
     }
     static var tickets: [IssueResponse] = []
     static func getLastCrashTimestamp() async throws -> Date? {
-        if tickets.isEmpty {
-            tickets = try await GitHubHelper.fetchLatestIssues()
-        }
+       let tickets = try await GitHubHelper.fetchLatestIssues(labels: "Crash Report")
         //IF no tickets return min date
         if tickets.isEmpty {
             return Date(timeIntervalSince1970: 0)
         }
         
         let lastTicketTimestamp = tickets
-            .filter(\.isCrashReportIssue)
             .compactMap(\.appStoreConnectCreationDate)
             .max()
 

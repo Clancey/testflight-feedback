@@ -4,7 +4,7 @@ import Utils
 public func runScript() {
     Task.detached {
         do {
-            let feedbacks = try await FeedbackRepository.getFeedbacks()
+            var feedbacks = try await FeedbackRepository.getFeedbacks()
             let lastTicketTimestamp = try await GitHubRepository.getLastScreenshotTimestamp()
             let newFeedbacks = feedbacks.newer(than: lastTicketTimestamp)
             print("Successfully fetched \(newFeedbacks.count) new feedback \(newFeedbacks.count > 0 ? "🤩" : "😭")", color: .green, bold: true)
@@ -17,6 +17,7 @@ public func runScript() {
             }
 
             let lastCrashTimestamp = try await GitHubRepository.getLastCrashTimestamp()
+            feedbacks = try await FeedbackRepository.getCrashes()
             let newCrashes = feedbacks.newer(than: lastCrashTimestamp)
             print("Successfully fetched \(newCrashes.count) new crashes \(newCrashes.count > 0 ? "🤩" : "😭")", color: .green, bold: true)
             if !newCrashes.isEmpty {

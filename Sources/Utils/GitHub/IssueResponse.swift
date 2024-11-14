@@ -30,14 +30,6 @@ public extension IssueResponse {
             .replacingOccurrences(of: " -->", with: "")
             .trimmingCharacters(in: .whitespaces)
     }
-    
-    var isScreenShotIssue: Bool {
-        body?.starts(with: "### User Feedback") == true
-    }
-
-    var isCrashReportIssue: Bool {
-        body?.starts(with: "### Crash Report") == true
-    }
 
     var isIssue: Bool {
         type == .issue

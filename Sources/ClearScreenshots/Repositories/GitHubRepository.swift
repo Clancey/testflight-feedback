@@ -6,7 +6,7 @@ final class GitHubRepository {
     // MARK: - Issues
 
     static func getClosedIssues(page: Int = 1) async throws -> [Issue] {
-        try await GitHubHelper.fetchLatestIssues(count: 100, // Max allowed count
+        try await GitHubHelper.fetchLatestIssues(labels: "Feedback", count: 100, // Max allowed count
                                                  page: page,
                                                  issueState: .closed)
             .compactMap { .init(from: $0) }
