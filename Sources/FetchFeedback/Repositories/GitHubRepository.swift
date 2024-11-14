@@ -83,8 +83,14 @@ final class GitHubRepository {
     func setupIssue(feedback: Feedback) async throws {
         let milestone = try await dequeueMilestone(title: feedback.appVersionString)
         let screenshots = try await addScreenshotsToRepository(
+        var screenshots: [ImageReference] = []
+        do{ screenshots = try await addScreenshotsToRepository(
             feedback.screenshotURLs,
             timestamp: feedback.attributes.timestamp)
+        } catch {
+            print("Screenshot already uploaded. Skipping Duplicate")
+            return;
+        }
         let issue = try Issue(
             from: feedback, milestoneNumber: milestone.number, screenshots: screenshots)
         let githubIssue = try await createIssue(issue)
