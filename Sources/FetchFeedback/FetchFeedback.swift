@@ -7,6 +7,7 @@ public func runScript() {
         var lastInsertedScreenshotTimestamp: Date?
         var shouldUpdateTimestamps = true
         do {
+            try await SpaceAuth.refreshAuth()
             var feedbacks = try await FeedbackRepository.getFeedbacks()
             let lastTicketTimestamp = try await GitHubRepository.getLastScreenshotTimestamp()
             let newFeedbacks = feedbacks.newer(than: lastTicketTimestamp)
@@ -48,7 +49,7 @@ public func runScript() {
                     try await updateTimeStamps(lastInsertedCrashTimestamp: lastInsertedCrashTimestamp, lastInsertedScreenshotTimestamp: lastInsertedScreenshotTimestamp)
                 }
                 catch{
-                    printFailedJob(error)
+                    print("Failed to update timestamps: \(error)", color: .red)
                 }
             }
             exit(EXIT_FAILURE)

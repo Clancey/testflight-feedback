@@ -11,6 +11,9 @@ public enum Environment: String {
     case backlogColumnId = "FEEDBACK_BACKLOG_COLUMN_ID"
 
     public func value() throws -> String {
+        if self == .fastlaneSession && Environment.fastLaneOverride != nil {
+            return Environment.fastLaneOverride!
+        }
         if let passedValue = passedValue, !passedValue.isEmpty {
             return passedValue
         }
@@ -24,6 +27,8 @@ public enum Environment: String {
         }
         return value
     }
+
+    public static var fastLaneOverride:String? = nil;
 
     var passedValue: String? {
         switch self {
